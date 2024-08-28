@@ -59,49 +59,38 @@ export function GetBalanceFromAccount(account_id:number|string): DefaultFunction
 type DepositResult = {
     destination: {id:string, balance:number}
 }
-function Deposit(db:DbHandler, destination:string, amount: number): DefaultFunctionReturn<DepositResult|null> {
-    let account:Account;
-    let result:DepositResult;
-    let {errorCode, data} = db.GetAccount(destination);
-    if(errorCode == NON_EXISTING_ACCOUNT_ERR) {
-        let {errorCode, data} = db.CreateAccount(destination, amount);
-
-        if(errorCode) {
-            return {errorCode, data:null};
-        }
-
-        account = data as Account;
-        result = {
-            destination: {
+function Deposit(db:Array<Account>, destination:string, amount: number): DefaultFunctionReturn<DepositResult|null> {
+    let account:Account|undefined;
+    account = db.find(row => row.account_id == destination)
+    if(!account) {
+        account = {account_id: destination, balance: amount}
+        db.push(account);
+        return {
+            errorCode:null,
+            data: {
+                destination: {
                     id: account.account_id,
                     balance: account.balance
+                }
             }
         }
-
-        return {errorCode:null, data: result}
-    } else if(errorCode) {
-        return {errorCode: UNKOWN_ERR, data:null}
     }
-    account = data as Account;
-    const balance = amount + account.balance
-    account.balance = balance
-    const updateResult = db.UpdateAccount(account.account_id, account);
-    if(updateResult.errorCode) {
-        return {errorCode:updateResult.errorCode, data:null}
-    }
-    result = {
-        destination: {
-            id: account.account_id,
-            balance: account.balance
+    account.balance = account.balance + amount
+    return {
+        errorCode: null,
+        data: {
+            destination: {
+                id: account.account_id,
+                balance: account.balance
+            }
         }
     }
-    return {errorCode: null, data: result}
 }
 type TransferResult = {
     origin: {id:string, balance:number},
     destination:{id:string, balance:number}
 }
-function Transfer(db:DbHandler, origin:string, destination:string, amount: number): DefaultFunctionReturn<TransferResult|null> {
+function Transfer(db:Array<Account>, origin:string, destination:string, amount: number): DefaultFunctionReturn<TransferResult|null> {
     return {
         errorCode: null,
         data: {
@@ -122,7 +111,7 @@ type WithdrawResult = {
         balance:number
     }
 }
-function Withdraw(db:DbHandler, destination:string, amount: number): DefaultFunctionReturn<WithdrawResult|null> {
+function Withdraw(db:Array<Account>, destination:string, amount: number): DefaultFunctionReturn<WithdrawResult|null> {
     return {
         errorCode: null,
         data: {
