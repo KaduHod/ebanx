@@ -15,9 +15,10 @@ export type Event = {
 };
 
 /*ERRORS*/
-export const NON_EXISTING_ACCOUNT_ERR = 1
-export const INPUT_ERROR = 2
+export const NON_EXISTING_ACCOUNT_ERR = 1;
+export const INPUT_ERROR = 2;
 export const ALREADY_EXISTS = 3;
+export const UNKOWN_ERR = 4;
 
 
 /*USE CASES*/
@@ -77,7 +78,9 @@ function Deposit(db:DbHandler, destination:string, amount: number): DefaultFunct
             }
         }
 
-        return { errorCode:null, data: result }
+        return {errorCode:null, data: result}
+    } else if(errorCode) {
+        return {errorCode: UNKOWN_ERR, data:null}
     }
     account = data as Account;
     const balance = amount + account.balance
@@ -92,10 +95,7 @@ function Deposit(db:DbHandler, destination:string, amount: number): DefaultFunct
             balance: account.balance
         }
     }
-    return {
-        errorCode: null,
-        data: result
-    }
+    return {errorCode: null, data: result}
 }
 type TransferResult = {
     origin: {id:string, balance:number},
