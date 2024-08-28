@@ -1,5 +1,5 @@
-import { DbHandler, GetDb } from "../infra/db";
-import { DefaultFunctionReturn } from "../main";
+import * as Global from "../global";
+import { GetDb } from "../infra/db";
 
 /*ENTITIES*/
 export type Account = {
@@ -14,37 +14,30 @@ export type Event = {
     destination?: string;
 };
 
-/*ERRORS*/
-export const NON_EXISTING_ACCOUNT_ERR = 1;
-export const INPUT_ERROR = 2;
-export const ALREADY_EXISTS = 3;
-export const UNKOWN_ERR = 4;
-
-
 /*USE CASES*/
-export function handleEvent(event: Event): DefaultFunctionReturn<any>{
+export function handleEvent(event: Event): Global.DefaultFunctionReturn<any>{
     if(event.amount < 0 ){
-        return {errorCode: INPUT_ERROR, data: null}
+        return {errorCode: Global.INPUT_ERROR, data: null}
     }
     const database = GetDb();
     switch (event.type) {
         case 'deposit':
             if(!event.origin) {
-                return {errorCode: INPUT_ERROR, data: null}
+                return {errorCode: Global.INPUT_ERROR, data: null}
             }
             return Deposit(database, event.origin, event.amount);
         case 'transfer':
             if(!event.destination || !event.origin) {
-                return {errorCode: INPUT_ERROR, data:null}
+                return {errorCode: Global.INPUT_ERROR, data:null}
             }
             return Transfer(database, event.origin, event.destination, event.amount);
         case 'withdraw':
             if(!event.origin) {
-                return {errorCode: INPUT_ERROR, data: null}
+                return {errorCode: Global.INPUT_ERROR, data: null}
             }
             return Withdraw(database, event.origin, event.amount);
         default:
-            return {errorCode: INPUT_ERROR, data: null}
+            return {errorCode: Global.INPUT_ERROR, data: null}
     }
 }
 
@@ -53,13 +46,13 @@ export function Reset(db: Array<Account>): Array<Account> {
     return db;
 }
 
-export function GetBalanceFromAccount(account_id:number|string): DefaultFunctionReturn<number> {
+export function GetBalanceFromAccount(account_id:number|string): Global.DefaultFunctionReturn<number> {
     return {data: 1, errorCode: null}
 }
 type DepositResult = {
     destination: {id:string, balance:number}
 }
-function Deposit(db:Array<Account>, destination:string, amount: number): DefaultFunctionReturn<DepositResult|null> {
+function Deposit(db:Array<Account>, destination:string, amount: number): Global.DefaultFunctionReturn<DepositResult|null> {
     let account:Account|undefined;
     account = db.find(row => row.account_id == destination)
     if(!account) {
@@ -90,7 +83,7 @@ type TransferResult = {
     origin: {id:string, balance:number},
     destination:{id:string, balance:number}
 }
-function Transfer(db:Array<Account>, origin:string, destination:string, amount: number): DefaultFunctionReturn<TransferResult|null> {
+function Transfer(db:Array<Account>, origin:string, destination:string, amount: number): Global.DefaultFunctionReturn<TransferResult|null> {
     return {
         errorCode: null,
         data: {
@@ -111,7 +104,7 @@ type WithdrawResult = {
         balance:number
     }
 }
-function Withdraw(db:Array<Account>, destination:string, amount: number): DefaultFunctionReturn<WithdrawResult|null> {
+function Withdraw(db:Array<Account>, destination:string, amount: number): Global.DefaultFunctionReturn<WithdrawResult|null> {
     return {
         errorCode: null,
         data: {
