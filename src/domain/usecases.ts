@@ -1,18 +1,6 @@
 import * as Global from "../global";
 import { GetDb } from "../infra/db";
-
-/*ENTITIES*/
-export type Account = {
-    account_id: string;
-    balance: number;
-};
-
-export type Event = {
-    type: "deposit" | "withdraw" | "transfer";
-    amount: number;
-    origin?: string;
-    destination?: string;
-};
+import { Account } from "./entities";
 
 /*USE CASES*/
 export function handleEvent(event: Event): Global.DefaultFunctionReturn<any>{
@@ -40,7 +28,6 @@ export function handleEvent(event: Event): Global.DefaultFunctionReturn<any>{
             return {errorCode: Global.INPUT_ERROR, data: null}
     }
 }
-
 export function Reset(db: Array<Account>): Array<Account> {
     db = [];
     return db;

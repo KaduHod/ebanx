@@ -1,5 +1,5 @@
-import { Account, Deposit ,GetBalanceFromAccount, Reset, Transfer, Withdraw } from "../domain/usecases"
-import { GetDb } from "../infra/db"
+import { Deposit ,GetBalanceFromAccount, Reset, Transfer, Withdraw } from "../domain/usecases"
+import { Account } from "../domain/entities"
 import * as Global from '../global'
 
 test('Reset', () => {
