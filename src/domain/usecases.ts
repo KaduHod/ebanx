@@ -46,17 +46,23 @@ export function Reset(db: Array<Account>): Array<Account> {
     return db;
 }
 
-export function GetBalanceFromAccount(account_id:number|string): Global.DefaultFunctionReturn<number> {
-    return {data: 1, errorCode: null}
+export function GetBalanceFromAccount(db: Array<Account>, account_id:string): Global.DefaultFunctionReturn<number> {
+    const account = db.find(row => row.account_id)
+    if(!account) {
+        return {
+            errorCode: Global.NON_EXISTING_ACCOUNT_ERR,
+            data: 0
+        }
+    }
+    return {data: account.balance, errorCode: null}
 }
 type DepositResult = {
     destination: {id:string, balance:number}
 }
-function Deposit(db:Array<Account>, destination:string, amount: number): Global.DefaultFunctionReturn<DepositResult|null> {
-    let account:Account|undefined;
-    account = db.find(row => row.account_id == destination)
-    if(!account) {
-        account = {account_id: destination, balance: amount}
+export function Deposit(db:Array<Account>, destination:string, amount: number): Global.DefaultFunctionReturn<DepositResult|null> {
+    const accountI = db.findIndex(row => row.account_id == destination)
+    if(accountI < 0) {
+        const account:Account = {account_id: destination, balance: amount}
         db.push(account);
         return {
             errorCode:null,
@@ -68,32 +74,59 @@ function Deposit(db:Array<Account>, destination:string, amount: number): Global.
             }
         }
     }
-    account.balance = account.balance + amount
+    db[accountI].balance = db[accountI].balance + amount
     return {
         errorCode: null,
         data: {
             destination: {
-                id: account.account_id,
-                balance: account.balance
+                id: db[accountI].account_id,
+                balance: db[accountI].balance
             }
         }
     }
 }
 type TransferResult = {
-    origin: {id:string, balance:number},
+    origin:{id:string, balance:number},
     destination:{id:string, balance:number}
 }
-function Transfer(db:Array<Account>, origin:string, destination:string, amount: number): Global.DefaultFunctionReturn<TransferResult|null> {
+export function Transfer(db:Array<Account>, origin:string, destination:string, amount: number): Global.DefaultFunctionReturn<TransferResult|null> {
+    const originAccountI = db.findIndex(row => row.account_id == origin)
+    if(originAccountI < 0) {
+        return {
+            errorCode: Global.NON_EXISTING_ACCOUNT_ERR,
+            data: null
+        }
+    }
+    if(db[originAccountI].balance < amount) {
+        return {
+            errorCode: Global.INPUT_ERROR,
+            data: null
+        }
+    }
+    let destAccountI = db.findIndex(row => row.account_id == destination)
+    if(destAccountI < 0) {
+        const auxCreateAccount = Deposit(db, destination, 0)
+        if(auxCreateAccount.errorCode) {
+            return {
+                errorCode: auxCreateAccount.errorCode,
+                data: null
+            }
+        }
+        destAccountI = db.findIndex(row => row.account_id == destination)
+    }
+    /*Filas Asyncronas*/
+    db[originAccountI].balance = db[originAccountI].balance - amount;
+    db[destAccountI].balance = db[destAccountI].balance + amount;
     return {
         errorCode: null,
         data: {
             destination: {
-                id: "1",
-                balance: 1
+                id:db[destAccountI].account_id,
+                balance:db[destAccountI].balance
             },
             origin: {
-                id:"2",
-                balance:2
+                id:db[originAccountI].account_id,
+                balance:db[originAccountI].balance
             }
         }
     }
@@ -104,13 +137,27 @@ type WithdrawResult = {
         balance:number
     }
 }
-function Withdraw(db:Array<Account>, destination:string, amount: number): Global.DefaultFunctionReturn<WithdrawResult|null> {
+export function Withdraw(db:Array<Account>, destination:string, amount: number): Global.DefaultFunctionReturn<WithdrawResult|null> {
+    const accountI = db.findIndex(row => row.account_id == destination)
+    if(accountI < 0) {
+        return {
+            errorCode: Global.NON_EXISTING_ACCOUNT_ERR,
+            data: null
+        }
+    }
+    if(db[accountI].balance < amount) {
+        return {
+            errorCode: Global.INPUT_ERROR,
+            data: null
+        }
+    }
+    db[accountI].balance = db[accountI].balance - amount
     return {
         errorCode: null,
         data: {
             origin: {
-                id: "1",
-                balance: 1
+                id: db[accountI].account_id,
+                balance: db[accountI].balance
             }
         }
     }
