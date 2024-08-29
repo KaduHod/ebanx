@@ -1,33 +1,6 @@
 import * as Global from "../global";
-import { GetDb } from "../infra/db";
 import { Account } from "./entities";
 
-/*USE CASES*/
-export function handleEvent(event: Event): Global.DefaultFunctionReturn<any>{
-    if(event.amount < 0 ){
-        return {errorCode: Global.INPUT_ERROR, data: null}
-    }
-    const database = GetDb();
-    switch (event.type) {
-        case 'deposit':
-            if(!event.origin) {
-                return {errorCode: Global.INPUT_ERROR, data: null}
-            }
-            return Deposit(database, event.origin, event.amount);
-        case 'transfer':
-            if(!event.destination || !event.origin) {
-                return {errorCode: Global.INPUT_ERROR, data:null}
-            }
-            return Transfer(database, event.origin, event.destination, event.amount);
-        case 'withdraw':
-            if(!event.origin) {
-                return {errorCode: Global.INPUT_ERROR, data: null}
-            }
-            return Withdraw(database, event.origin, event.amount);
-        default:
-            return {errorCode: Global.INPUT_ERROR, data: null}
-    }
-}
 export function Reset(db: Array<Account>): Array<Account> {
     db = [];
     return db;
