@@ -4,7 +4,8 @@
   "description": "Home teste do processo seletivo ebanx.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "nodemon src/main.ts"
   },
   "author": "",
   "license": "ISC",
