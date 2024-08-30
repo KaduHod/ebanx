@@ -17,6 +17,7 @@ export function startServer(db:Account[]){
         }
         const { errorCode, data } = UseCases.GetBalanceFromAccount(db, account_id);
         if(errorCode) {
+            res.setHeader('Content-type', 'text/plain')
             return res.status(
                 Global.NON_EXISTING_ACCOUNT_ERR == errorCode ? 404 : 500
             ).send("0");
@@ -37,7 +38,7 @@ export function startServer(db:Account[]){
                         depositResult.errorCode == Global.NON_EXISTING_ACCOUNT_ERR ? 404 : 500
                     ).send("0");
                 }
-                return res.status(200).send(depositResult.data)
+                return res.status(201).send(depositResult.data)
             case 'transfer':
                 var transferResult = UseCases.Transfer(db, event.origin, event.destination, event.amount)
                 if(transferResult.errorCode) {
@@ -53,7 +54,7 @@ export function startServer(db:Account[]){
                         withdrawResult.errorCode == Global.NON_EXISTING_ACCOUNT_ERR ? 404 : 500
                     ).send("0")
                 }
-                return res.status(200).json(withdrawResult.data)
+                return res.status(201).json(withdrawResult.data)
             default:
                 res.sendStatus(500);
                 break;
