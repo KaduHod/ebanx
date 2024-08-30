@@ -2,25 +2,25 @@ import { Deposit ,GetBalanceFromAccount, Reset, Transfer, Withdraw } from "../do
 import { Account } from "../domain/entities"
 import * as Global from '../global'
 
-test('Reset', () => {
+test('UseCase :: Reset', () => {
     let db:Account[] = [{account_id:"1", balance:10}]
     db = Reset(db)
     expect(db.length).toBe(0)
 })
-test('Get balance for non-existing account', () => {
+test('UseCase :: Get balance for non-existing account', () => {
     const db:Account[] = [];
     const {errorCode, data} = GetBalanceFromAccount(db, "1")
     expect(errorCode).toBeTruthy();
     expect(data).toBe(0)
 })
-test('Create account with initial balance', () => {
+test('UseCase :: Create account with initial balance', () => {
     const db:Account[] = [];
     const {errorCode, data} = Deposit(db, "100", 10);
     expect(errorCode).toBeFalsy();
     expect(data).toBeTruthy();
-    if (data) expect(data.destination.balance).toBe(10)
+    expect(data?.destination.balance).toBe(10)
 })
-test('Deposit into existing acocunt', () => {
+test('UseCase :: Deposit into existing acocunt', () => {
     const db:Account[] = [{account_id:"100", balance:10}]
     const {errorCode, data} = Deposit(db, "100", 10);
     expect(errorCode).toBeFalsy();
@@ -29,14 +29,14 @@ test('Deposit into existing acocunt', () => {
         expect(data.destination.balance).toBe(20)
     }
 })
-test('Get balance for existing account', () => {
+test('UseCase :: Get balance for existing account', () => {
     const db:Account[] = [{account_id:"100", balance:20}]
     const {errorCode, data} = GetBalanceFromAccount(db, "100");
     expect(errorCode).toBeFalsy();
     expect(data).toBeTruthy();
     expect(data).toBe(20)
 })
-test('Withdraw from existing account', () => {
+test('UseCase :: Withdraw from existing account', () => {
     const db:Account[] = [{account_id:"105", balance:20}];
     const {errorCode, data} = Withdraw(db, "105", 5)
     expect(errorCode).toBeFalsy();
@@ -46,7 +46,7 @@ test('Withdraw from existing account', () => {
         expect(data.origin.id).toBe("105")
     }
 })
-test('Transfer from existing account', () => {
+test('UseCase :: Transfer from existing account', () => {
     const db:Account[] = [{account_id:"100", balance:15}]
     const {errorCode, data} = Transfer(db, "100", "300", 15)
     expect(errorCode).toBeFalsy();
@@ -56,7 +56,7 @@ test('Transfer from existing account', () => {
     expect(data?.origin?.balance).toBe(0);
 
 });
-test('Transfer from non existing account', () => {
+test('UseCase :: Transfer from non existing account', () => {
     const db:Account[] = [{account_id:"100", balance:1000000}];
     const {errorCode, data} = Transfer(db, "200", "100", 300);
     expect(data).toBeFalsy();
