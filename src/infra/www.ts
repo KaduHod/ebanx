@@ -8,7 +8,7 @@ export function startServer(db:Account[]){
     server.use(express.json())
     server.post('/reset', (_, res) => {
         db = UseCases.Reset(db);
-        res.status(200).send();
+        res.status(200).send("OK");
     })
     server.get('/balance', (req, res) => {
         const account_id = req.query.account_id

@@ -1,6 +1,8 @@
 const resetTest = async () => {
     const res = await post('reset');
     expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toBe("OK");
 };
 const getBalanceForNonExistingAccount = async () => {
     const res = await get('balance?account_id=1234');
